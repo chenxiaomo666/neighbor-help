@@ -8,6 +8,8 @@ class User(db.Model):
 
     id = db.Column("id", db.Integer, primary_key=True)
     name = db.Column("name", db.String(64))
+    age = db.Column("age", db.Integer)
+    balance = db.Column("balance", db.Float, default=0.0)    # 账户余额
     address = db.Column("address", db.Text)
     phone = db.Column("phone", db.String(20))
     openid = db.Column("openid", db.String(64))

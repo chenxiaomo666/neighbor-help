@@ -20,3 +20,9 @@ with app.app_context():
     from .views import user_view
     app.register_blueprint(user_view, url_prefix="/cxm")
 
+    from .views import purchase_view
+    app.register_blueprint(purchase_view, url_prefix="/cxm")
+
+    from .views import message_view
+    app.register_blueprint(message_view, url_prefix="/cxm")
+

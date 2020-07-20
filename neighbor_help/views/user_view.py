@@ -11,29 +11,40 @@ user_view = Blueprint("user_view", __name__)
 
 
 # 增加新用户，实现user_id与微信号一一绑定
-@user_view.route("/user/add", methods=["POST"])
+@user_view.route("/user/upsert", methods=["POST"])
 @panic()
 def user_add():
     user_data = request.get_json()
-    user = base_query(User).filter_by(openid=user_data['openid']).first()
-    if user is None:
-        user = User()
-    user.name = user_data["name"]
-    user.openid = user_data["openid"]
-    user.nickname = user_data["nickname"]
-    user.head_img = user_data["head_img"]
-    user.sex = user_data["sex"]
-    user.phone = user_data["phone"]
-    user.address = user_data["address"]
-
-    db.session.add(user)
+    if user_data.get("user_id") is None:
+        user = base_query(User).filter_by(openid=user_data['openid']).first()
+        if user is None:
+            user = User()
+        user.name = user_data["name"]
+        user.head_img = user_data["head_img"]
+        user.phone = user_data["phone"]
+        user.age = user_data["age"]
+        user.address = user_data["address"]
+        user.openid = user_data["openid"]
+        user.nickname = user_data["nickname"]
+        user.sex = user_data["sex"]
+        db.session.add(user)
+    else:
+        user_id = user_data.get("user_id")
+        user = base_query(User).filter_by(id=user_id).first()
+        user.name = user_data["name"]
+        user.head_img = user_data["head_img"]
+        user.phone = user_data["phone"]
+        user.age = user_data["age"]
+        user.address = user_data["address"]
     db.session.flush()
 
-    session["user_id"] = user.id
+    # session["user_id"] = user.id
 
     db.session.commit()
 
-    return success()
+    return success({
+        "user_id": user.id
+    })
 
 
 # 查询微信用户是否在本数据库中进行过绑定
@@ -54,16 +65,32 @@ def user_query():
 
     user_openid = user_data['openid']
 
+
     user = base_query(User).filter_by(openid=user_openid).first()
     if user is not None:
         is_bind = True
         session["user_id"] = user.id
+        user_id = user.id
+        print("用户已绑定", session.get("user_id"))
     else:
         is_bind = False
+        user_id = None
 
     return success({
         "is_bind": is_bind,
-        "open_id": user_openid
+        "open_id": user_openid,
+        "user_id": user_id
     })
 
 
+# 查询微信用户是否在本数据库中进行过绑定
+@user_view.route("/user/info", methods=["GET"])
+@panic()
+def user_info():
+    user_id = request.args.get("user_id")
+
+    result = get_user_info(user_id)
+
+    return success({
+        "result": result
+    })

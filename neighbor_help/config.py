@@ -8,3 +8,7 @@ class Config(object):
 
     APPID = "wx0e98bcaab5de88ec"
     SECRET = "0d6dca5ea0cbd7b64a4328206d9a7bc9"
+
+    RETIREMENT = 60      # 退休年龄
+    
+    
