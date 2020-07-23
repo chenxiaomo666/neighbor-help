@@ -29,10 +29,19 @@ def user_add():
         user.sex = user_data["sex"]
         db.session.add(user)
     else:
+        if user_data["img_change"]==1:
+            print(user_data["head_img"])
+            if user_data["head_img"][0:4] == "http":
+                img_url = "https://dev.mylwx.cn:5000/file/{}".format(user_data["head_img"][11:])
+            elif data["head_img"][0:6] == "wxfile":
+                img_url = "https://dev.mylwx.cn:5000/file/{}".format(user_data["head_img"][9:])
+        else:
+            img_url = user_data["head_img"]
+
         user_id = user_data.get("user_id")
         user = base_query(User).filter_by(id=user_id).first()
         user.name = user_data["name"]
-        user.head_img = user_data["head_img"]
+        user.head_img = img_url
         user.phone = user_data["phone"]
         user.age = user_data["age"]
         user.address = user_data["address"]
