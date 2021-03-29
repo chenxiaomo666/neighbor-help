@@ -7,9 +7,7 @@ from ..services.tool import base_query, get_user_info
 from datetime import datetime
 import json
 
-
 message_view = Blueprint("message_view", __name__)
-
 id_name = {
         1: "邻里享",
         2: "邻里约",
@@ -28,7 +26,6 @@ id_name = {
 @panic()
 def message_list():
     message_type = request.args.get("business_id")
-
     result = []
     messages = base_query(Message).filter_by(message_type=message_type).order_by(Message.time.desc()).all()
     for message in messages:
@@ -41,7 +38,6 @@ def message_list():
             "content": message.content,
             "time": str(message.time)
         })
-
     return success({
         "result": result
     })
@@ -52,7 +48,6 @@ def message_list():
 @panic()
 def message_add():
     data = request.get_json()
-    
     message = Message()
     message.user_id = data["user_id"]
     message.message_type = data["business_id"]
@@ -60,28 +55,26 @@ def message_add():
     message.title = data["title"]
     message.content = data["content"]
     message.time = datetime.now()
-
     db.session.add(message)
     db.session.commit()
-
     return success()
 
 
+# 根据business_id获得相对应的name，用于前端页面展示
 @message_view.route("/message/name", methods=["GET"])
 @panic()
 def message_name():
     message_type = request.args.get("business_id")
-
     return success({
         "message_name": id_name[int(message_type)]
     })
 
 
+# 邻里享模块发布物品或车位共享信息，insert
 @message_view.route("/linlixaing/release", methods=["POST"])
 @panic()
 def linlixiang_release():
     data = request.get_json()
-
     try:
         img_url = ""
         if data["img_path"][0:4] == "http":
@@ -90,7 +83,6 @@ def linlixiang_release():
             img_url = "https://dev.mylwx.cn:5000/file/{}".format(data["img_path"][9:])
     except:
         img_url = ""
-
     message = Message()
     message.user_id = data["user_id"]
     message.message_type = 1    # 邻里享
@@ -101,13 +93,12 @@ def linlixiang_release():
         message.title = "{}|{}".format(data["start_time"], data["end_time"])
     message.content = img_url
     message.time = datetime.now()
-
     db.session.add(message)
     db.session.commit()
-
     return success()
 
 
+# 根据share_type获取共享信息列表
 @message_view.route("/linlixiang/list", methods=["GET"])
 @panic()
 def linlixiang_list():
@@ -129,17 +120,16 @@ def linlixiang_list():
             "img_url": message.content,
             "time": str(message.time)
         })
-
     return success({
         "result": result
     })
 
 
+# 单个信息详情展示
 @message_view.route("/linlixiang/single", methods=["GET"])
 @panic()
 def linlixiang_single():
     message_id = request.args.get("message_id")
-
     result = {}
     message = base_query(Message).filter_by(id=message_id).first()
     if message is not None:
@@ -153,18 +143,16 @@ def linlixiang_single():
             result["title"] = message.message_name
             result["avail_time"] = message.title
             result["img_url"] = message.content
-
     return success({
         "result": result
     })
 
 
-# ###########需修改  # 已修改
+# ###########需修改  # 已修改  邻里代模块发布信息
 @message_view.route("/linlidai/release", methods=["POST"])
 @panic()
 def linlidai_release():
     data = request.get_json()
-
     try:
         img_url = ""
         if data["img_path"][0:4] == "http":
@@ -173,12 +161,10 @@ def linlidai_release():
             img_url = "https://dev.mylwx.cn:5000/file/{}".format(data["img_path"][9:])
     except:
         img_url = ""
-
     content = {}
     content["img_url"] = img_url
     content["get_method"] = data["get_method"]
     content["mass_list"] = data["mass_list"]
-
     message = Message()
     message.user_id = data["user_id"]
     message.message_type = 3    # 邻里代
@@ -186,18 +172,16 @@ def linlidai_release():
     message.title = data["address"]
     message.content = json.dumps(content)
     message.time = datetime.now()
-
     db.session.add(message)
     db.session.commit()
-
     return success()
 
 
+# 根据type_id获得发布内容简要列表
 @message_view.route("/linlidai/list", methods=["GET"])
 @panic()
 def linlidai_list():
     type_id = request.args.get("type_id")
-    
     result = []
     messages = base_query(Message).filter_by(message_type=3, message_name=type_id).order_by(Message.time.desc()).all()
     for message in messages:
@@ -213,18 +197,16 @@ def linlidai_list():
             "mass_list": content["mass_list"],
             "time": str(message.time)
         })
-
     return success({
         "result": result
     })
 
 
-# 根据message_id获得message
+# 根据message_id获得message详细信息
 @message_view.route("/linlidai/single", methods=["GET"])
 @panic()
 def linlidai_single():
     message_id = request.args.get("message_id")
-
     result = {}
     message = base_query(Message).filter_by(id=message_id).first()
     if message is not None:
@@ -238,12 +220,11 @@ def linlidai_single():
         result["get_method"] = content["get_method"]
         result["mass_list"] = content["mass_list"]
         result["time"] = str(message.time)
-
     return success({
         "result": result
     })
-    
 
+############################################
 @message_view.route("/linliyue/release", methods=["POST"])
 @panic()
 def linliyue_release():
